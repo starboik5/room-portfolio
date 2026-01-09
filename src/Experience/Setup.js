@@ -41,6 +41,25 @@ export function setupThreeJS(canvasSelector) {
     controls.minAzimuthAngle = CAMERA.MIN_AZIMUTH;
     controls.maxAzimuthAngle = CAMERA.MAX_AZIMUTH;
 
+    // Responsive Camera Logic
+    function updateCameraPosition() {
+        const isMobile = window.innerWidth < 768; // Mobile Breakpoint
+        if (isMobile) {
+            // Move camera back for mobile
+            camera.position.set(
+                CAMERA.POSITION.x * 1.5,
+                CAMERA.POSITION.y * 1.5,
+                CAMERA.POSITION.z * 1.5
+            );
+        } else {
+            // Original position for desktop
+            camera.position.set(CAMERA.POSITION.x, CAMERA.POSITION.y, CAMERA.POSITION.z);
+        }
+    }
+
+    // Initialize position
+    updateCameraPosition();
+
     // Resize Listener
     window.addEventListener('resize', () => {
         // Update sizes
@@ -50,6 +69,9 @@ export function setupThreeJS(canvasSelector) {
         // Update camera
         camera.aspect = sizes.width / sizes.height;
         camera.updateProjectionMatrix();
+
+        // Update position based on new width
+        updateCameraPosition();
 
         // Update renderer
         renderer.setSize(sizes.width, sizes.height);

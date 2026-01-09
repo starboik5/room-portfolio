@@ -31,6 +31,17 @@ window.addEventListener('mousemove', (event) => {
     mouse.y = -(event.clientY / sizes.height) * 2 + 1;
 });
 
+// Touch Interaction Support
+window.addEventListener('touchstart', (event) => {
+    if (event.touches.length > 0) {
+        mouse.x = (event.touches[0].clientX / sizes.width) * 2 - 1;
+        mouse.y = -(event.touches[0].clientY / sizes.height) * 2 + 1;
+
+        // Optional: Trigger raycaster immediately for tap responsiveness
+        // handleRaycaster(); 
+    }
+}, { passive: false });
+
 // --- Media Setup ---
 // Audio
 const bgMusic = document.createElement('audio');
