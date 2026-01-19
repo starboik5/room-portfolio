@@ -6,10 +6,43 @@ import gsap from 'gsap';
 
 import { setupThreeJS } from './Experience/Setup.js';
 import { createLoadingManager } from './Utils/LoadingManager.js';
-import { PATHS, COLORS, ANIMATION } from './constants.js';
+import { PATHS, COLORS, ANIMATION, CAMERA } from './constants.js';
 
 // --- Initialization ---
-const { scene, camera, renderer, controls, sizes } = setupThreeJS('.experience-canvas');
+const { scene, camera, cameraGroup, renderer, controls, sizes } = setupThreeJS('.experience-canvas');
+
+// Set Initial Camera Position (Intro Start)
+camera.position.set(CAMERA.INTRO.START.x, CAMERA.INTRO.START.y, CAMERA.INTRO.START.z);
+
+// Auto-Reset Camera Logic
+let cameraResetTimeout = null;
+
+const startCameraResetTimer = () => {
+    if (cameraResetTimeout) clearTimeout(cameraResetTimeout);
+
+    // Wait 3 seconds after interaction stops, then reset
+    cameraResetTimeout = setTimeout(() => {
+        gsap.to(camera.position, {
+            x: CAMERA.INTRO.END.x,
+            y: CAMERA.INTRO.END.y,
+            z: CAMERA.INTRO.END.z,
+            duration: 3.5, // Slow and smooth
+            ease: "power2.inOut"
+        });
+
+        // Also reset target if needed (optional, depends on if user panned)
+        // gsap.to(controls.target, { ... });
+    }, 2000); // 2s wait before starting return
+};
+
+controls.addEventListener('start', () => {
+    if (cameraResetTimeout) clearTimeout(cameraResetTimeout);
+    gsap.killTweensOf(camera.position);
+});
+
+controls.addEventListener('end', () => {
+    startCameraResetTimer();
+});
 
 // --- Interaction State ---
 const raycaster = new THREE.Raycaster();
@@ -49,19 +82,110 @@ bgMusic.src = PATHS.AUDIO_BG;
 bgMusic.loop = true;
 bgMusic.volume = 0.3;
 
-const attemptAudioPlay = () => {
-    bgMusic.play().catch(() => {
-        const playOnInteraction = () => {
-            bgMusic.play();
-            document.removeEventListener('click', playOnInteraction);
-            document.removeEventListener('keydown', playOnInteraction);
-        };
-        document.addEventListener('click', playOnInteraction);
-        document.addEventListener('keydown', playOnInteraction);
-        console.log('Audio autoplay blocked. Will play on first interaction.');
+// Click-to-Enter Sequence
+const enterButton = document.getElementById('enter-button');
+const loadingScreen = document.getElementById('loading-screen');
+const progressBar = document.querySelector('.progress-bar');
+const percentageText = document.querySelector('.loading-percentage');
+
+if (enterButton) {
+    enterButton.addEventListener('click', () => {
+        // 1. Play Audio
+        bgMusic.play().catch(e => console.error('Audio play failed:', e));
+
+        // 2. Camera Intro Animation
+        gsap.to(camera.position, {
+            x: CAMERA.INTRO.END.x,
+            y: CAMERA.INTRO.END.y,
+            z: CAMERA.INTRO.END.z,
+            duration: 2.5,
+            ease: "power2.inOut"
+        });
+
+        // 3. Direct Reveal (Fade Out Overlay)
+        if (loadingScreen) {
+            loadingScreen.classList.add('fade-out');
+            setTimeout(() => {
+                loadingScreen.remove();
+            }, 2500);
+        }
+
+        if (enterButton) enterButton.classList.add('hidden');
     });
+}
+
+// Audio Toggle Logic
+const mediaToggle = document.getElementById('media-toggle');
+const iconOn = document.querySelector('.icon-on');
+const iconOff = document.querySelector('.icon-off');
+
+if (mediaToggle && iconOn && iconOff) {
+    mediaToggle.addEventListener('click', () => {
+        bgMusic.muted = !bgMusic.muted;
+
+        if (bgMusic.muted) {
+            iconOn.classList.add('hidden');
+            iconOff.classList.remove('hidden');
+        } else {
+            iconOn.classList.remove('hidden');
+            iconOff.classList.add('hidden');
+        }
+    });
+}
+
+// Side Drawer Navigation Logic
+const sideDrawer = document.getElementById('side-drawer');
+const drawerClose = document.getElementById('drawer-close');
+const canvasElement = document.querySelector('.experience-canvas');
+
+// Content Sections
+const contentSections = document.querySelectorAll('.drawer-section');
+
+// Buttons
+const btnAbout = document.getElementById('btn-about');
+const btnSkills = document.getElementById('btn-skills');
+const btnWork = document.getElementById('btn-work');
+const btnContact = document.getElementById('btn-contact');
+
+const openDrawer = (sectionId) => {
+    // 1. Hide all sections
+    contentSections.forEach(section => section.classList.add('hidden'));
+
+    // 2. Show target section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) targetSection.classList.remove('hidden');
+
+    // 3. Open Drawer & Blur Canvas
+    sideDrawer.classList.add('open');
+    canvasElement.classList.add('blurred');
 };
-attemptAudioPlay();
+
+const closeDrawer = () => {
+    sideDrawer.classList.remove('open');
+    canvasElement.classList.remove('blurred');
+};
+
+// Event Listeners for Nav
+if (sideDrawer) {
+    if (btnAbout) btnAbout.addEventListener('click', (e) => { e.stopPropagation(); openDrawer('content-about'); });
+    if (btnSkills) btnSkills.addEventListener('click', (e) => { e.stopPropagation(); openDrawer('content-skills'); });
+    if (btnWork) btnWork.addEventListener('click', (e) => { e.stopPropagation(); openDrawer('content-work'); });
+    if (btnContact) btnContact.addEventListener('click', (e) => { e.stopPropagation(); openDrawer('content-contact'); });
+
+    // Close Button
+    if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+
+    // Click Outside to Close
+    document.addEventListener('click', (e) => {
+        const isClickInside = sideDrawer.contains(e.target);
+        // We use closest('.nav-grid') to ensure clicks on ANY nav button don't close the drawer immediately before reopening
+        const isClickNav = e.target.closest('.nav-grid');
+
+        if (!isClickInside && !isClickNav && sideDrawer.classList.contains('open')) {
+            closeDrawer();
+        }
+    });
+}
 
 // Helper: Setup Video Element
 function createVideo(path) {
@@ -291,6 +415,30 @@ const handleRaycaster = () => {
     }
 };
 
+const updateCameraParallax = () => {
+    // Current Controls State
+    const currentPolar = controls.getPolarAngle();
+    const currentAzimuth = controls.getAzimuthalAngle();
+
+    // Potential Shifts
+    const shiftY = mouse.x * ANIMATION.PARALLAX.INTENSITY * 0.5; // Yaw
+    const shiftX = -mouse.y * ANIMATION.PARALLAX.INTENSITY * 0.5; // Pitch
+
+    // Clamp Pitch (Polar Angle)
+    let targetX = shiftX;
+    // Approximating impact: if currentPolar is near limits, restrict shiftX
+    if (currentPolar + shiftX < CAMERA.MIN_POLAR) targetX = Math.max(shiftX, CAMERA.MIN_POLAR - currentPolar);
+    if (currentPolar + shiftX > CAMERA.MAX_POLAR) targetX = Math.min(shiftX, CAMERA.MAX_POLAR - currentPolar);
+
+    // Clamp Yaw (Azimuth Angle)
+    let targetY = shiftY;
+    if (currentAzimuth + shiftY < CAMERA.MIN_AZIMUTH) targetY = Math.max(shiftY, CAMERA.MIN_AZIMUTH - currentAzimuth);
+    if (currentAzimuth + shiftY > CAMERA.MAX_AZIMUTH) targetY = Math.min(shiftY, CAMERA.MAX_AZIMUTH - currentAzimuth);
+
+    cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y, targetY, ANIMATION.PARALLAX.EASE);
+    cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, targetX, ANIMATION.PARALLAX.EASE);
+};
+
 // --- Main Tick ---
 const tick = () => {
     const time = performance.now() * 0.001;
@@ -301,6 +449,7 @@ const tick = () => {
     updateGlow(time);
     updateChair(time);
     handleRaycaster();
+    updateCameraParallax();
 
     renderer.render(scene, camera);
     window.requestAnimationFrame(tick);

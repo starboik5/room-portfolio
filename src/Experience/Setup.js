@@ -17,7 +17,11 @@ export function setupThreeJS(canvasSelector) {
     // Camera
     const camera = new THREE.PerspectiveCamera(CAMERA.FOV, sizes.width / sizes.height, CAMERA.NEAR, CAMERA.FAR);
     camera.position.set(CAMERA.POSITION.x, CAMERA.POSITION.y, CAMERA.POSITION.z);
-    scene.add(camera);
+
+    // Group for Parallax Overlay
+    const cameraGroup = new THREE.Group();
+    cameraGroup.add(camera);
+    scene.add(cameraGroup);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({
@@ -78,5 +82,5 @@ export function setupThreeJS(canvasSelector) {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
 
-    return { scene, camera, renderer, controls, sizes };
+    return { scene, camera, cameraGroup, renderer, controls, sizes };
 }

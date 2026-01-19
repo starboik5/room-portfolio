@@ -7,22 +7,35 @@ import { ANIMATION } from '../constants.js';
  */
 export function createLoadingManager() {
     const loadingScreen = document.getElementById('loading-screen');
+    const progressBar = document.querySelector('.progress-bar');
+    const percentageText = document.querySelector('.loading-percentage');
 
     return new THREE.LoadingManager(
         // onLoad
         () => {
             console.log('All assets loaded!');
-            if (loadingScreen) {
-                loadingScreen.classList.add('fade-out');
-                setTimeout(() => {
-                    loadingScreen.remove();
-                }, ANIMATION.DURATION.FADE_OUT);
-            }
+
+            // 1. Complete Bar Width (just in case)
+            if (progressBar) progressBar.style.width = '100%';
+            if (percentageText) percentageText.textContent = '100%';
+
+            // 2. Reveal Enter & Dissolve Bar
+            setTimeout(() => {
+                const enterButton = document.getElementById('enter-button');
+
+                // Dissolve Bar & Text
+                if (progressBar) progressBar.classList.add('fade-out');
+                if (percentageText) percentageText.classList.add('hidden');
+
+                // Show Button
+                if (enterButton) enterButton.classList.remove('hidden');
+            }, 500);
         },
         // onProgress
         (url, itemsLoaded, itemsTotal) => {
             const progress = (itemsLoaded / itemsTotal) * 100;
-            console.log(`Loading: ${progress.toFixed(0)}% (${itemsLoaded}/${itemsTotal})`);
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            if (percentageText) percentageText.textContent = `${Math.round(progress)}%`;
         },
         // onError
         (url) => {

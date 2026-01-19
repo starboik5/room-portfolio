@@ -20,19 +20,27 @@ export const ANIMATION = {
     DURATION: {
         HOVER_ENTER: 0.5,
         HOVER_LEAVE: 0.5,
-        FADE_OUT: 800
+        FADE_OUT: 2000
     },
     EASE: {
         HOVER_ENTER: "back.out(1.7)",
         HOVER_LEAVE: "power2.out"
+    },
+    PARALLAX: {
+        INTENSITY: 0.25,
+        EASE: 0.2 // Lerp factor
     }
 };
 
 export const CAMERA = {
-    FOV: 30,
+    FOV: 20,
     NEAR: 0.1,
     FAR: 100,
-    POSITION: { x: 7, y: 2, z: 7 },
+    POSITION: { x: 5.00, y: 1.40, z: 4.00 }, // Default/Target Position
+    INTRO: {
+        START: { x: 6.55, y: 0.00, z: 7.60 },
+        END: { x: 5.00, y: 1.40, z: 4.00 }
+    },
     MIN_DISTANCE: 4,
     MAX_DISTANCE: 10,
     MIN_POLAR: 0,
