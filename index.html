@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Room Portfolio</title>
 </head>
@@ -11,14 +14,176 @@
 <body>
   <!-- Loading Screen -->
   <div id="loading-screen">
-    <div class="loader-container">
-      <div class="spinner"></div>
-      <p class="loading-text">Loading...</p>
-    </div>
+    <div class="progress-bar"></div>
+    <div class="loading-percentage">0%</div>
+    <button id="enter-button" class="hidden">Enter Experience</button>
   </div>
 
   <div class="experience">
     <canvas class="experience-canvas"></canvas>
+
+    <!-- Audio Toggle -->
+    <button id="media-toggle" aria-label="Toggle Audio">
+      <!-- Volume On Icon -->
+      <svg class="icon-on" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      </svg>
+      <!-- Volume Off Icon (Hidden by default) -->
+      <svg class="icon-off hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <line x1="23" y1="9" x2="17" y2="15"></line>
+        <line x1="17" y1="9" x2="23" y2="15"></line>
+      </svg>
+    </button>
+
+    <!-- Navigation Grid -->
+    <div class="nav-grid">
+      <!-- Row 1 -->
+      <button id="btn-about" class="nav-btn" aria-label="About Me">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </button>
+      <button id="btn-skills" class="nav-btn" aria-label="What I Do">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+      </button>
+
+      <!-- Row 2 -->
+      <button id="btn-work" class="nav-btn" aria-label="Work & Projects">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+      </button>
+      <button id="btn-contact" class="nav-btn" aria-label="Contact">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Side Drawer -->
+    <div id="side-drawer">
+      <button id="drawer-close" aria-label="Close Drawer">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- About Me Content -->
+      <div id="content-about" class="drawer-section hidden">
+        <h2>About Me</h2>
+        <h3>Bridging the gap between robust enterprise architecture and immersive 3D web experiences.</h3>
+        <p>I am a Full-Stack Developer with over 3 years of experience building scalable applications. While my
+          foundation lies in Mechanical Engineering, I transitioned into software development, spending significant time
+          at Tata Consultancy Services (TCS) architecting high-availability systems.</p>
+        <p>Recently, I have pivoted toward modern frontend architectures, combining my backend expertise in Java and
+          Spring Boot with creative technologies like Next.js and Three.js. I specialize in transforming complex data
+          into interactive, visually engaging user experiences—from real-time server monitoring dashboards to gamified
+          3D environments. My goal is to build applications that are not just functional, but immersive.</p>
+      </div>
+
+      <!-- What I Do (Skills) Content -->
+      <div id="content-skills" class="drawer-section hidden">
+        <h2>What I Do</h2>
+
+        <div class="skill-block">
+          <h3>🚀 Full-Stack Engineering</h3>
+          <p>I build scalable, secure web applications from the ground up. My background includes architecting RESTful
+            APIs and microservices that handle high-volume traffic for enterprise environments.</p>
+          <p class="tech-stack"><strong>Tech Stack:</strong> Java 17, Spring Boot, Node.js, SQL (PostgreSQL, MSSQL).</p>
+        </div>
+
+        <div class="skill-block">
+          <h3>🎨 Creative Frontend & 3D Web</h3>
+          <p>I bring websites to life using WebGL and 3D rendering. I design custom 3D assets in Blender and integrate
+            them into React applications using React Three Fiber to create unique, browser-based experiences.</p>
+          <p class="tech-stack"><strong>Tech Stack:</strong> Next.js 14, Three.js, React Three Fiber, Tailwind CSS,
+            Blender.</p>
+        </div>
+
+        <div class="skill-block">
+          <h3>☁️ DevOps & Cloud Deployment</h3>
+          <p>I ensure applications run smoothly in production. I have experience orchestrating containerized deployments
+            and streamlining CI/CD pipelines to achieve zero downtime during critical releases.</p>
+          <p class="tech-stack"><strong>Tech Stack:</strong> Docker, Google Cloud Platform (GCP), Jenkins, Git.</p>
+        </div>
+      </div>
+
+      <!-- Work & Projects Content -->
+      <div id="content-work" class="drawer-section hidden">
+        <h2>Work & Projects</h2>
+
+        <h3>Experience</h3>
+        <div class="work-block">
+          <h4>Tata Consultancy Services (TCS) | Full-Stack Developer</h4>
+          <p class="meta">Chennai, India | Mar 2022 – May 2025</p>
+          <ul>
+            <li>Architected a real-time server monitoring dashboard using React and Spring Boot, reducing incident
+              response times by 20%.</li>
+            <li>Optimized backend performance by refining database queries, cutting data retrieval latency by 25% for
+              over 100 servers.</li>
+            <li>Automated 30% of manual ETL workflows using dbt, significantly accelerating release cycles.</li>
+          </ul>
+        </div>
+
+        <h3>Selected Projects</h3>
+        <div class="project-block">
+          <h4>1. Immersive 3D Interactive Portfolio</h4>
+          <p><strong>Stack:</strong> Three.js, React Three Fiber, Blender</p>
+          <p>A gamified, browser-based 3D portfolio featuring custom isometric environments modeled in Blender.</p>
+          <ul>
+            <li><strong>Performance:</strong> Achieved 60 FPS across devices by optimizing polygon counts and texture
+              baking.</li>
+            <li><strong>Interactivity:</strong> Implemented raycasting and collision detection for a fully navigable
+              user experience.</li>
+          </ul>
+          <a href="#" class="demo-link">Live Demo</a>
+        </div>
+
+        <div class="project-block">
+          <h4>2. Real-Time Stock Market Analytics Platform</h4>
+          <p><strong>Stack:</strong> Next.js 14, Inngest, Tailwind CSS</p>
+          <p>A high-performance financial dashboard delivering sub-second latency for stock data visualization.</p>
+          <ul>
+            <li><strong>Architecture:</strong> Utilized an event-driven architecture with Inngest to handle background
+              jobs for price alerts without blocking the UI.</li>
+            <li><strong>Visualization:</strong> Deployed scalable charts (Recharts) to visualize complex historical
+              trends.</li>
+          </ul>
+          <a href="#" class="demo-link">Live Demo</a>
+        </div>
+      </div>
+
+      <!-- Contact Content -->
+      <div id="content-contact" class="drawer-section hidden">
+        <h2>Contact</h2>
+        <p>I am always open to discussing new projects, creative collaborations, or opportunities in Full-Stack
+          development.</p>
+
+        <div class="contact-details">
+          <p><strong>Email:</strong> <a href="mailto:kiranrathnavelu@zohomail.in">kiranrathnavelu@zohomail.in</a></p>
+          <p><strong>Phone:</strong> <a href="tel:+916379703711">+91 63797 03711</a></p>
+          <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/kiranrathavel"
+              target="_blank">linkedin.com/in/kiranrathavel</a></p>
+          <p><strong>Location:</strong> Chennai, India</p>
+        </div>
+      </div>
+    </div>
   </div>
   <script type="module" src="/src/main.js"></script>
 </body>
