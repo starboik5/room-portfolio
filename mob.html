@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mob Psycho Progress Bar</title>
+    <style>
+        /* Import the Stencil Font */
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
+
+        :root {
+            /* We use CSS variables so JS can update them easily */
+            --bottom-color: #ffffff;
+            --shadow-color: rgba(255, 255, 255, 0.3);
+        }
+
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Black Ops One', cursive;
+            overflow: hidden;
+            /* Prevents scrollbars during shake */
+        }
+
+        .mob-counter {
+            font-size: 15rem;
+
+            /* Keeps stencil cuts visible */
+
+            user-select: none;
+
+            /* DYNAMIC GRADIENT */
+            /* Top stays white (45%), Bottom changes based on progress (90%) */
+            background: linear-gradient(360deg, #ffffff 10%, var(--bottom-color) 50%);
+
+            /* Standard clip for text gradient */
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+
+            /* Dynamic Glow matching the color */
+            filter: drop-shadow(0px 0px 1px var(--shadow-color));
+
+            /* Smooth transition for color changes */
+            transition: filter 0.1s linear;
+        }
+
+
+
+
+        /* SHAKE ANIMATION */
+        .shake {
+            animation: rumble 0.1s infinite;
+        }
+
+        @keyframes rumble {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mob-counter" id="counter">
+        <span id="number">0</span><span class="percent-sign">%</span>
+    </div>
+
+    <script>
+        const numberEl = document.getElementById('number');
+        const counterEl = document.getElementById('counter');
+        const root = document.documentElement;
+
+        let progress = 0;
+
+        // 1. DEFINE YOUR COLOR STOPS (R, G, B)
+        // White -> Cyan -> Blue -> Green -> Yellow -> Orange -> Red
+        const colorStops = [
+            { pct: 0, r: 255, g: 255, b: 255 }, // White
+            { pct: 16, r: 0, g: 255, b: 255 }, // Cyan
+            { pct: 32, r: 0, g: 0, b: 255 }, // Blue
+            { pct: 48, r: 0, g: 255, b: 0 }, // Green
+            { pct: 64, r: 255, g: 255, b: 0 }, // Yellow
+            { pct: 80, r: 255, g: 165, b: 0 }, // Orange
+            { pct: 100, r: 255, g: 0, b: 0 }  // Red
+        ];
+
+        // Helper: Linear Interpolation between two values
+        function lerp(start, end, t) {
+            return start + (end - start) * t;
+        }
+
+        // Helper: Get the current RGB based on progress
+        function getColorForProgress(currentPct) {
+            // Find which two color stops we are between
+            for (let i = 0; i < colorStops.length - 1; i++) {
+                const startStop = colorStops[i];
+                const endStop = colorStops[i + 1];
+
+                if (currentPct >= startStop.pct && currentPct <= endStop.pct) {
+                    // Calculate how far we are between these two stops (0.0 to 1.0)
+                    const range = endStop.pct - startStop.pct;
+                    const progressInSegment = currentPct - startStop.pct;
+                    const t = progressInSegment / range;
+
+                    // Blend the colors
+                    const r = Math.round(lerp(startStop.r, endStop.r, t));
+                    const g = Math.round(lerp(startStop.g, endStop.g, t));
+                    const b = Math.round(lerp(startStop.b, endStop.b, t));
+
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
+            }
+            return 'rgb(255, 0, 0)'; // Fallback to Red at 100%
+        }
+
+        // 2. ANIMATION LOOP
+        const interval = setInterval(() => {
+            progress++;
+            numberEl.innerText = progress;
+
+            // Update Colors
+            const currentColor = getColorForProgress(progress);
+            root.style.setProperty('--bottom-color', currentColor);
+            root.style.setProperty('--shadow-color', currentColor); // Update glow too
+
+            // Trigger Shake at 80% (Orange phase)
+            if (progress > 80) {
+                counterEl.classList.add('shake');
+            }
+
+            // Completion
+            if (progress >= 100) {
+                clearInterval(interval);
+
+
+
+                // Fade out
+                setTimeout(() => {
+                    counterEl.style.transition = "opacity 0.5s ease";
+                    counterEl.style.opacity = "0";
+                    // Reset BG for next scene
+                    document.body.style.backgroundColor = "#000";
+                }, 300);
+            }
+        }, 60); // Adjust speed here (lower is faster)
+    </script>
+</body>
+
+</html>

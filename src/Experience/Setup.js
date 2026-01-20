@@ -45,20 +45,15 @@ export function setupThreeJS(canvasSelector) {
     controls.minAzimuthAngle = CAMERA.MIN_AZIMUTH;
     controls.maxAzimuthAngle = CAMERA.MAX_AZIMUTH;
 
-    // Responsive Camera Logic
+    // Responsive Camera Logic (Dynamic Scaling)
     function updateCameraPosition() {
-        const isMobile = window.innerWidth < 768; // Mobile Breakpoint
-        if (isMobile) {
-            // Move camera back for mobile
-            camera.position.set(
-                CAMERA.POSITION.x * 1.5,
-                CAMERA.POSITION.y * 1.5,
-                CAMERA.POSITION.z * 1.5
-            );
-        } else {
-            // Original position for desktop
-            camera.position.set(CAMERA.POSITION.x, CAMERA.POSITION.y, CAMERA.POSITION.z);
-        }
+        // 1. Calculate Ratio (Reference Width: 1170px)
+        const scaleRatio = Math.min(window.innerWidth / 1170, 1);
+
+        // 2. Apply to Camera Zoom
+        // This effectively "zooms out" on smaller screens without changing position
+        camera.zoom = scaleRatio;
+        camera.updateProjectionMatrix();
     }
 
     // Initialize position
