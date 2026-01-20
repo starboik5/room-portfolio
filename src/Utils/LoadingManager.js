@@ -28,7 +28,14 @@ export function createLoadingManager() {
                 if (percentageText) percentageText.classList.add('hidden');
 
                 // Show Button
-                if (enterButton) enterButton.classList.remove('hidden');
+                if (enterButton) {
+                    enterButton.classList.remove('hidden');
+                }
+
+                const bottomUI = document.getElementById('loading-bottom-ui');
+                if (bottomUI) {
+                    bottomUI.classList.remove('hidden');
+                }
             }, 500);
         },
         // onProgress

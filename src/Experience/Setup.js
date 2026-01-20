@@ -35,16 +35,7 @@ export function setupThreeJS(canvasSelector) {
     // Controls
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
-    controls.enablePan = true; // Enable Panning
-    controls.panSpeed = 1.0;
-    controls.screenSpacePanning = false; // Pan in ground plane (Maps style)
-
-    // Touch Actions (Google Maps Style)
-    controls.touches = {
-        ONE: THREE.TOUCH.ROTATE,
-        TWO: THREE.TOUCH.DOLLY_PAN
-    };
-
+    controls.enablePan = false;
     // Zoom limits
     controls.minDistance = CAMERA.MIN_DISTANCE;
     controls.maxDistance = CAMERA.MAX_DISTANCE;
