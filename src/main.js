@@ -83,36 +83,49 @@ bgMusic.loop = true;
 bgMusic.volume = 0.3;
 
 // Click-to-Enter Sequence
+// Click-to-Enter Sequence
 const enterButton = document.getElementById('enter-button');
+const enterSilent = document.getElementById('enter-silent');
+const loadingBottomUI = document.getElementById('loading-bottom-ui');
 const loadingScreen = document.getElementById('loading-screen');
-const progressBar = document.querySelector('.progress-bar');
-const percentageText = document.querySelector('.loading-percentage');
 
-if (enterButton) {
-    enterButton.addEventListener('click', () => {
-        // 1. Play Audio
-        bgMusic.play().catch(e => console.error('Audio play failed:', e));
+const startExperience = (mute = false) => {
+    // 1. Audio Setup
+    bgMusic.muted = mute;
+    bgMusic.play().catch(e => console.error('Audio play failed:', e));
 
-        // 2. Camera Intro Animation
-        gsap.to(camera.position, {
-            x: CAMERA.INTRO.END.x,
-            y: CAMERA.INTRO.END.y,
-            z: CAMERA.INTRO.END.z,
-            duration: 2.5,
-            ease: "power2.inOut"
-        });
-
-        // 3. Direct Reveal (Fade Out Overlay)
-        if (loadingScreen) {
-            loadingScreen.classList.add('fade-out');
-            setTimeout(() => {
-                loadingScreen.remove();
-            }, 2500);
+    // Update Toggle Icon if Muted
+    if (mute) {
+        const iconOn = document.querySelector('.icon-on');
+        const iconOff = document.querySelector('.icon-off');
+        if (iconOn && iconOff) {
+            iconOn.classList.add('hidden');
+            iconOff.classList.remove('hidden');
         }
+    }
 
-        if (enterButton) enterButton.classList.add('hidden');
+    // 2. Camera Intro
+    gsap.to(camera.position, {
+        x: CAMERA.INTRO.END.x,
+        y: CAMERA.INTRO.END.y,
+        z: CAMERA.INTRO.END.z,
+        duration: 2.5,
+        ease: "power2.inOut"
     });
-}
+
+    // 3. Reveal
+    if (loadingScreen) {
+        loadingScreen.classList.add('fade-out');
+        setTimeout(() => loadingScreen.remove(), 2500);
+    }
+
+    // Hide UI immediately
+    if (enterButton) enterButton.classList.add('hidden');
+    if (loadingBottomUI) loadingBottomUI.classList.add('hidden');
+};
+
+if (enterButton) enterButton.addEventListener('click', () => startExperience(false));
+if (enterSilent) enterSilent.addEventListener('click', () => startExperience(true));
 
 // Audio Toggle Logic
 const mediaToggle = document.getElementById('media-toggle');
