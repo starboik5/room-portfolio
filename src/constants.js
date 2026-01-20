@@ -41,7 +41,7 @@ export const CAMERA = {
         START: { x: 6.55, y: 0.00, z: 7.60 },
         END: { x: 5.00, y: 1.40, z: 4.00 }
     },
-    MIN_DISTANCE: 4,
+    MIN_DISTANCE: 3,
     MAX_DISTANCE: 10,
     MIN_POLAR: 0,
     MAX_POLAR: Math.PI / 2,
